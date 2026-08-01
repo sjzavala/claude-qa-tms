@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "qase": {
+      "command": "zsh",
+      "args": ["-c", "exec npx -y @qase/mcp-server@2.0.0"]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "qa-tms",
+  "description": "TMS-driven QA loop: explore a running app with Playwright MCP, file test cases in Qase, verify them in a real browser, and generate traceable Playwright specs with JSDoc headers that map back to the case.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Seve Zavala"
+  }
+}
