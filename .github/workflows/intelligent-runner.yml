@@ -32,6 +32,14 @@ on:
       install-command:
         type: string
         default: 'npm ci'
+      install-browser-deps:
+        description: >-
+          Pass --with-deps when installing browsers. Off by default: GitHub's
+          ubuntu-latest image already carries Chromium's system libraries, and the flag
+          shells out to sudo apt-get, which can block indefinitely on the apt lock.
+          Enable it on a self-hosted or slim runner.
+        type: boolean
+        default: false
       qa-tms-ref:
         description: 'Ref of sjzavala/claude-qa-tms to take the selection engine from.'
         type: string
@@ -106,7 +114,18 @@ jobs:
         run: ${{ inputs.install-command }}
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        # Bounded well under the job budget. Without this, an apt-lock hang here burns
+        # the full 20 minutes and the tests never run at all — the job reports a timeout
+        # rather than the actual cause, which is a slow and confusing way to fail.
+        timeout-minutes: 6
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          if [ "${{ inputs.install-browser-deps }}" = "true" ]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install chromium
+          fi
 
       - name: Run tests
         id: tests
