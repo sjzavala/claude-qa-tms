@@ -120,7 +120,11 @@ jobs:
             npx playwright test
           elif [ "$MODE" = "subset" ] && [ -n "$SPEC_ARGS" ]; then
             echo "Running selected specs: $SPEC_ARGS"
-            # Unquoted on purpose — the engine emits a space-separated list of paths.
+            # Unquoted on purpose: the engine emits a space-separated list of paths that
+            # must reach Playwright as separate arguments. Safe because every value is a
+            # repo-relative spec path the engine itself produced from a directory walk,
+            # never from PR-controlled input.
+            # shellcheck disable=SC2086
             npx playwright test $SPEC_ARGS
           else
             echo "Running the full suite (selection escalated)."
