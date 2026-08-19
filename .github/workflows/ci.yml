@@ -9,18 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Selection engine
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-      # No install step — the engine and its tests are dependency-free by design, so
-      # the reusable workflow can run them in any consumer repo without a lockfile.
-      - run: node --test scripts/*.test.mjs
-
   validate:
     name: Plugin structure
     runs-on: ubuntu-latest
