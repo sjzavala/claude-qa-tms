@@ -25,6 +25,8 @@ A spec generated from only the numeric id loses its trace back to the case.
 
 Tool names and params: `references/qase-tools.md` — the published Qase README is wrong about several of them.
 
+If a case reads vaguely and you find yourself guessing at selectors, the case is the problem, not the spec. `references/case-authoring.md` has the step format that makes the mapping mechanical — say so in one line and generate the best spec you can rather than stalling.
+
 **Verify first if you haven't.** Generating a spec from a case you've never executed produces plausible-looking tests with wrong selectors. If the case hasn't been run in this session, use the browser to confirm the real accessible names and roles before writing code — `browser_snapshot` on the relevant page is enough.
 
 ## Step 2 — Decide whether this should be a UI test at all
@@ -84,6 +86,7 @@ Every generated test carries the traceability header from `references/spec-templ
  * @suite         Borrower Search > Filtering
  * @priority      high
  * @preconditions API on :4000 with default seed data
+ * @covers        server/routes.js client/src/App.jsx
  * @guards        BUG-3 — lowercase query returned zero results
  * @generated-by  qa-tms:codegen
  */
@@ -96,6 +99,7 @@ test(
 
 - The `@qase-id` in the JSDoc and the `@qase:<ID>` tag must agree. The tag makes it runnable: `npx playwright test --grep @qase:BOR-12`.
 - `@guards` is only present on regression tests written for a specific bug — it's the line that tells a future maintainer why the test exists and why deleting it is dangerous.
+- `@covers` lists the source files the test actually exercised — the routes the run hit, the components that rendered — as repo-root-relative paths or globs. You are the only one who can write it accurately, because you just watched the test run. Name real files; don't reach for `server/**` to be safe, since an over-broad glob is what makes CI stop trusting the map. Omit it if you genuinely don't know: an unclaimed file makes CI run the full suite, which is the safe outcome, just a slower one. Format details: `references/spec-template.md`.
 - If the repo has `playwright-qase-reporter` installed, also call `qase.id(12)` inside the test body so results auto-link on the Qase side. Do not add the dependency yourself just to use it.
 
 **Show the spec in full for review.** After writing the file, print the complete generated

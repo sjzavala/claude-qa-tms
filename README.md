@@ -80,6 +80,67 @@ npx -y @qase/mcp-server@2.0.0 --help
 
 **4. Verify** — start Claude Code and run `/mcp`. You should see both `qase` and `playwright` connected.
 
+## CI: the intelligent runner
+
+The traceability header is not just documentation — it is a machine-readable coverage map, and CI can read it. Label a PR **`use-intelligent-runner`** and the workflow maps the diff to the specs that declare coverage of the changed files, runs only those, and comments the selection with its reasoning.
+
+```yaml
+# .github/workflows/pr-tests.yml in your repo
+name: PR tests
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  tests:
+    uses: sjzavala/claude-qa-tms/.github/workflows/intelligent-runner.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+    with:
+      test-dir: tests
+```
+
+Specs declare what they exercise with `@covers`; the runner also reads any source path cited in `@guards`, so specs written before this existed still map correctly:
+
+```js
+/**
+ * @qase-id  BOR-12
+ * @covers   server/routes.js client/src/App.jsx
+ * @guards   BUG-3 — lowercase query returned zero results (server/routes.js:37-39)
+ */
+```
+
+**Selection rules**, applied in order, each recorded in the PR comment:
+
+| Rule | Effect |
+|---|---|
+| `spec-changed` | a changed spec always runs itself |
+| `covers-glob` | changed file matches a spec's `@covers` |
+| `guards-path` | changed file is cited in a spec's `@guards` |
+| `smoke` | anything tagged `@smoke` runs on every PR |
+| *infra changed* | `playwright.config.*`, lockfiles, workflows → **full suite** |
+| *unmapped file* | no spec claims the changed file → **full suite** |
+
+The last two matter most. **Narrowing is never a guess:** anything the engine cannot explain escalates to running everything, so an unannotated repo gets correct results on day one and gets faster as `@covers` lines accumulate. A runner that silently skips the one test that mattered is worse than no runner.
+
+Without the label, the full suite runs — the label opts *into* narrowing, so the default stays safe.
+
+Tune the escalation globs per repo in `.qa-tms/selection.json`:
+
+```json
+{
+  "infraGlobs": ["playwright.config.*", "package.json", "src/testing/**"],
+  "ignoreGlobs": ["**/*.md", "docs/**"]
+}
+```
+
+The engine (`scripts/select-tests.mjs`) is dependency-free and importable, so you can run it locally against an arbitrary diff:
+
+```bash
+node scripts/select-tests.mjs --changed "server/routes.js" --test-dir tests
+```
+
 ## Offline fallback
 
 Every skill degrades gracefully. If Qase is unreachable or the token is missing, cases are read from and written to `test-cases/*.md` in the repo (format: `references/local-cases.md`). The loop keeps working; only the hosted UI is lost. Nothing here requires debugging MCP config mid-session.
@@ -96,9 +157,17 @@ qa-tms/
 ├── .claude-plugin/plugin.json
 ├── .mcp.json                      # qase MCP server, token from env
 ├── skills/{explore,case,verify,codegen}/SKILL.md
+├── scripts/
+│   ├── select-tests.mjs           # diff → spec selection engine (zero deps)
+│   ├── select-tests.test.mjs      # its unit tests
+│   └── validate-plugin.mjs        # structural checks on the plugin itself
+├── .github/workflows/
+│   ├── intelligent-runner.yml     # reusable: label-gated test selection
+│   └── ci.yml                     # this repo's own checks
 └── references/
     ├── qase-tools.md              # authoritative MCP tool names (the vendor README is wrong)
     ├── bug-report-template.md     # bug report format + rules
+    ├── case-authoring.md          # writing cases codegen can map mechanically
     ├── spec-template.md           # JSDoc traceability header
     └── local-cases.md             # offline case format
 ```

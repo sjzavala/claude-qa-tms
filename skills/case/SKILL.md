@@ -18,6 +18,8 @@ No project code is hardcoded. Take it from the conversation if it's already unam
 
 Exact tool names and params are in `references/qase-tools.md` — the published Qase README lists names that don't exist on the shipped server, so use that file, not your memory.
 
+Step wording follows `references/case-authoring.md`: every step names the element by its visible label or role, and every expected result names an observable value. That is what makes `qa-tms:codegen` able to pick a selector mechanically instead of guessing.
+
 ## Step 2 — Shape the cases
 
 Before writing anything, decide the case list. Good cases for a regression suite:
