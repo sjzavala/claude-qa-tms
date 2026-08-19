@@ -14,7 +14,7 @@ Try Qase first. If the `qase` MCP tools are unavailable, or the first call error
 
 Call `qase_project_context` with the project `code` once — it returns the suites tree, milestones, environments, custom fields, and users in a single call, cached for 5 minutes. Cache that in your head for the rest of the session; don't re-fetch per case.
 
-Default project code: **`LOANCRATE`**. If there are several projects, ask which one **once**, then proceed.
+No project code is hardcoded. Take it from the conversation if it's already unambiguous; otherwise ask which project to use **once**, then proceed. If you always work in one project, set it as the default here.
 
 Exact tool names and params are in `references/qase-tools.md` — the published Qase README lists names that don't exist on the shipped server, so use that file, not your memory.
 
@@ -38,7 +38,7 @@ Map to Qase fields via `qase_case_upsert`:
 | `suite_id` | Group by feature area. Suite creation is not a core tool — use `qase_discover_tools` with `{query: "suite", activate: true}`, or `qase_api` with `POST /v1/suite/{code}`. |
 | `severity` / `priority` | Match the bug's user impact. Regression guards for High/Critical bugs are `high` priority. |
 | `preconditions` | Server URL, seed data state, auth state. Anything the test assumes. |
-| `steps` | Each step: `action` + `expected_result`. The expected result must be **observable** — a visible value, count, or element state. |
+| `steps` | Each step has three fields in this order: `action`, `data`, `expected_result` — that's how Qase renders it and how a tester reads it (*do this, with this input, see this*). Put the literal input in `data` rather than burying it in the action sentence; leave `data` empty for steps that take no input. The expected result must be **observable** — a visible value, count, or element state. |
 | `description` | For a regression case, link the bug: what was broken, and the file:line if known. |
 | `custom_field` / tags | Tag regression guards (e.g. `regression`, `bug-guard`) so they're filterable later. |
 

@@ -9,7 +9,7 @@ Only 13 core tools are exposed by default. Others (deletions, milestones, suites
 attachments, environments, shared steps) must be activated on demand with
 `qase_discover_tools`, or reached via the `qase_api` escape hatch.
 
-**Almost every tool takes `code`** — the project code, e.g. `LOANCRATE`. Pass it every time.
+**Almost every tool takes `code`** — the project code, e.g. `ACME`. Pass it every time.
 
 ## Core tools
 
@@ -36,7 +36,7 @@ Enum fields accept **either** a label or a numeric ID — the server normalizes,
 - `priority`: `high` | `medium` | `low` (0=not set, 1=high, 2=medium, 3=low)
 - `severity`: `blocker` | `critical` | `major` | `normal` | `minor` | `trivial` | `undefined`
 - `automation`: `Manual` (0) | `To be automated` (1) | `Automated` (2) — set to `Automated` after `/qa-tms:codegen` ships a spec
-- `steps`: array of `{action, expected_result, data?}`; `steps_type` is `classic` (default) or `gherkin`. Substeps nest under `steps`.
+- `steps`: array of `{action, data?, expected_result}` — Qase renders a step in that order (action, data, expected result), so author them that way; `data` holds the literal input and is optional. `steps_type` is `classic` (default) or `gherkin`. Substeps nest under `steps`.
 - `defect.status`: `open` | `in_progress` | `resolved` | `invalid`
 - Project `code` must match `^[A-Z0-9_]+$`, 2–10 chars.
 

@@ -30,13 +30,18 @@ Ambiguity in, guesswork out.
 **Preconditions** — URL and data state:
 > `App running at http://localhost:3000 with default seed data (60 borrowers, 3 named Smith)`
 
-**Steps** — each with an `action` and an `expected_result`:
+**Steps** — Qase gives each step three fields, in this order: **action**, **data**, **expected result**. Author them in that order; it's how the Qase UI lays the step out and how a tester reads it — *do this, with this input, and see this*.
 
-| Action | Expected result |
-|---|---|
-| Open the borrower search page | The table renders with the first page of results |
-| Type `smith` (lowercase) into the **Search borrowers** field | Exactly 3 rows are shown, all with last name Smith |
-| Read the result count above the table | It reads `3 borrowers` |
+| Action | Data | Expected result |
+|---|---|---|
+| Open the borrower search page | | The table renders with the first page of results |
+| Type the term into the **Search borrowers** field | `smith` | Exactly 3 rows are shown, all with last name Smith |
+| Read the result count above the table | | It reads `3 borrowers` |
+
+Put the literal input in **data**, not buried in the action sentence. It's a first-class
+field: it keeps the action reusable, it's what a tester copies and pastes, and
+`/qa-tms:codegen` reads it as the literal value to drive the generated spec. `data` is
+optional — leave it empty for steps that take no input, like the two above.
 
 **Description** — for a regression case, name the defect:
 > `Regression guard for BUG-5: server/routes.js:38 compared the raw query, so a lowercase search matched nothing.`
